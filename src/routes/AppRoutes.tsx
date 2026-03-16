@@ -5,10 +5,13 @@ import Login from "../pages/login/Login.tsx";
 import Signup from "../pages/signup/Signup.tsx";
 import Cars from "../pages/cars/Cars.tsx";
 import Dashboard from "../pages/dashboard/Dashboard.tsx";
+import Navbar from "../components/common/Navbar.tsx";
+import Footer from "../components/common/Footer.tsx";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
 
         <Route path="/" element={<Home />} />
@@ -18,6 +21,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
 
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
