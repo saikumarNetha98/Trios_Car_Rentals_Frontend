@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/home/Home.tsx";
 import Login from "../pages/login/Login.tsx";
@@ -9,20 +9,19 @@ import Navbar from "../components/common/Navbar.tsx";
 import Footer from "../components/common/Footer.tsx";
 
 function AppRoutes() {
-  return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
+  return (<>
+    <Navbar />
+    <Routes>
 
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/cars" element={<Cars />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/cars" element={<Cars />} />
+      <Route path="/dashboard" element={<Dashboard />} />
 
-      </Routes>
-      <Footer />
-    </BrowserRouter>
+    </Routes>
+    <Footer />
+  </>
   );
 }
 
