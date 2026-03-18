@@ -55,23 +55,22 @@ export default function Signup() {
       newErrors.email = "Enter a valid email address";
     }
 
-    if (!form.phone.trim()) {
+    const phone = form.phone.trim();
+    if (!phone) {
       newErrors.phone = "Phone number is required";
-    } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
+    } else if (!/^[6-9]\d{9}$/.test(phone)) {
       newErrors.phone = "Enter a valid 10-digit Indian mobile number";
     }
 
+    // Password: only required
     if (!form.password) {
       newErrors.password = "Password is required";
-    } else if (form.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.password)) {
-      newErrors.password = "Must include uppercase, lowercase and a number";
     }
 
+    // Confirm Password: must match password
     if (!form.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
-    } else if (form.password !== form.confirmPassword) {
+    } else if (form.password && form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -80,24 +79,76 @@ export default function Signup() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-    setApiError("");
+    const { name, value } = e.target;
+
+    // Phone input: allow only numbers
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "");
+      setForm({ ...form, [name]: numericValue });
+
+      // Validate phone immediately
+      if (!numericValue) {
+        setErrors((prev) => ({ ...prev, phone: "Phone number is required" }));
+      } else if (!/^[6-9]\d{9}$/.test(numericValue)) {
+        setErrors((prev) => ({ ...prev, phone: "Enter a valid 10-digit Indian mobile number" }));
+      } else {
+        setErrors((prev) => ({ ...prev, phone: "" })); // clear error
+      }
+    }
+    // Password input: no restrictions, just required
+    else if (name === "password") {
+      setForm({ ...form, [name]: value });
+
+      // Check password is not empty
+      setErrors((prev) => ({
+        ...prev,
+        password: value ? "" : "Password is required",
+      }));
+
+      // Also validate confirm password if it has value
+      if (form.confirmPassword) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: form.confirmPassword !== value ? "Passwords do not match" : "",
+        }));
+      }
+    }
+    // Confirm password: must match password
+    else if (name === "confirmPassword") {
+      setForm({ ...form, [name]: value });
+
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: value !== form.password ? "Passwords do not match" : "",
+      }));
+    }
+    // Other fields (name, email, etc.)
+    else {
+      setForm({ ...form, [name]: value });
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+
+    setApiError(""); // clear API errors on any input
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
     setApiError("");
+      console.log("Signup success started");
+
     try {
-      await API.post("/auth/signup", {
+      const response = await API.post("/auth/register", {
         name: form.name,
         email: form.email,
         phone: form.phone,
         password: form.password,
       });
-      navigate("/login");
+
+      console.log("Signup success:", response.data);
+      navigate("/login"); // redirect to login after successful signup
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message;
@@ -106,7 +157,6 @@ export default function Signup() {
       setLoading(false);
     }
   };
-
   const inputSx = (field: keyof Errors) => ({
     "& .MuiOutlinedInput-root": {
       borderRadius: 2,
@@ -246,13 +296,18 @@ export default function Signup() {
                   value={form.phone}
                   onChange={handleChange}
                   error={!!errors.phone}
-                  helperText={errors.phone || "10-digit Indian mobile number"}
+                  helperText={errors.phone}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>+91</Typography>
                       </InputAdornment>
                     ),
+                    inputProps: {
+                      maxLength: 10,
+                      pattern: "[0-9]*",
+                      inputMode: "numeric",
+                    },
                   }}
                   sx={inputSx("phone")}
                 />
@@ -270,7 +325,7 @@ export default function Signup() {
                   value={form.password}
                   onChange={handleChange}
                   error={!!errors.password}
-                  helperText={errors.password || "Min 8 chars, uppercase, lowercase & number"}
+                  helperText={errors.password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">

@@ -6,11 +6,26 @@ import {
   Box,
   Container
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import logo from "../../assets/images/Trios_Logo.png";
+import { Link, useNavigate } from "react-router-dom";
 
 
-function Navbar() {
+type NavbarProps = {
+  isLoggedIn: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const Navbar = ({ isLoggedIn, setIsLoggedIn }: NavbarProps) => {
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false); // 🔥 triggers re-render
+    navigate("/login");
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -100,23 +115,21 @@ function Navbar() {
           {/* LOGIN SIGNUP */}
 
           <Box sx={{ display: "flex", gap: 2 }}>
+            {isLoggedIn ? (
+              <Button variant="outlined" color="error" onClick={handleLogout}>
+                Logout
+              </Button>
+            ) : (
+              <>
+                <Button variant="outlined" component={Link} to="/login">
+                  Login
+                </Button>
 
-            <Button
-              variant="outlined"
-              component={Link}
-              to="/login"
-            >
-              Login
-            </Button>
-
-            <Button
-              variant="contained"
-              component={Link}
-              to="/signup"
-            >
-              Signup
-            </Button>
-
+                <Button variant="contained" component={Link} to="/signup">
+                  Signup
+                </Button>
+              </>
+            )}
           </Box>
 
         </Toolbar>

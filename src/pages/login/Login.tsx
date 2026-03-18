@@ -6,10 +6,15 @@ import {
   Alert, CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff, DirectionsCar } from "@mui/icons-material";
+import API from "../../services/api.ts";
 
-export default function Login() {
+type LoginProps = {
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export default function Login({ setIsLoggedIn }: LoginProps) {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,14 +29,16 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const response = await API.post("/auth/login", {
+        identifier: form.identifier,
+        password: form.password,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Invalid credentials");
-      localStorage.setItem("token", data.token);
+      console.log("response: ", response?.data?.token)
+      // const data = aait response
+      if (!response.status) throw new Error(response?.data.message || "Invalid credentials");
+      localStorage.setItem("token", response?.data?.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setIsLoggedIn(true);
       navigate("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed. Try again.");
@@ -136,14 +143,16 @@ export default function Login() {
           <Box component="form" onSubmit={handleSubmit}>
 
             <TextField
-              label="Email Address"
-              name="email"
-              type="email"
+              label="Email or Mobile Number"
+              name="identifier"
+              type="text" // important (not email)
               fullWidth
               required
-              autoComplete="email"
-              value={form.email}
+              autoComplete="username"
+              value={form.identifier}
               onChange={handleChange}
+              // error={!!errors.identifier}
+              // helperText={errors.identifier || "Enter email or 10-digit mobile number"}
               sx={{ ...inputSx, mb: 2.5 }}
             />
 
