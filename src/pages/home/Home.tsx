@@ -1,4 +1,3 @@
-import Navbar from "../../components/common/Navbar";
 import {
   Box,
   Typography,
@@ -10,56 +9,101 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Cars from "../cars/Cars.tsx";
-
+import { useEffect, useState } from "react";
 function Home() {
 
   const navigate = useNavigate();
+  const images = [
+    "../../assets/images/car1.jpeg",
+    "../../assets/images/car2.jpg",
+    "../../assets/images/car3.jpg",
+    "../../assets/images/car4.jpeg",
+  ];
+
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Box>
 
-      {/* <Navbar /> */}
-
-      {/* HERO SECTION */}
-
+      
       <Box
         sx={{
-          minHeight: "80vh",
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1503376780353-7e6692767b70)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          display: "flex",
-          alignItems: "center",
-          color: "white",
+          position: "relative",
+          height: "85vh",
+          overflow: "hidden",
         }}
       >
-        <Container>
+        {/* Background Slides */}
+        {images.map((img, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundImage: `url(${img})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              transition: "opacity 1s ease-in-out",
+              opacity: i === index ? 1 : 0,
+            }}
+          />
+        ))}
 
-          <Typography
-            variant="h3"
-            fontWeight="bold"
-            sx={{ maxWidth: 600 }}
-          >
-            Find Your Perfect Ride — Anytime, Anywhere
-          </Typography>
+        {/* Dark Overlay */}
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2))",
+            zIndex: 1,
+          }}
+        />
 
-          <Typography mt={2} sx={{ maxWidth: 500 }}>
-            Self drive or with driver. Affordable rentals and instant booking.
-          </Typography>
+        {/* Content */}
+        <Container
+          sx={{
+            position: "relative",
+            zIndex: 2,
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Box>
+            <Typography variant="h3" fontWeight="bold" sx={{ maxWidth: 600 }}>
+              Find Your Perfect Ride — Anytime, Anywhere
+            </Typography>
 
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ mt: 3 }}
-            onClick={() => navigate("/cars")}
-          >
-            Explore Cars
-          </Button>
+            <Typography mt={2} sx={{ maxWidth: 500 }}>
+              Self drive or with driver. Affordable rentals and instant booking.
+            </Typography>
 
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ mt: 3 }}
+              onClick={() => navigate("/cars")}
+            >
+              Explore Cars
+            </Button>
+          </Box>
         </Container>
-      </Box>
 
+       
+      </Box>
 
       {/* FEATURED CARS */}
 
